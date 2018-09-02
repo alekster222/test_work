@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('css/app.css')}}">
+			<link rel="stylesheet" href="{{ asset('css/dropzone_custom.css')}}">
+			<link rel="stylesheet" href="{{ asset('css/bootstrap.min.css')}}">
+			<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+        {% endblock %}
+    </head>
+    <body>
+{% block body %}
+	<header>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<h1>Тестовое задание</h1>
+				</div>
+			</div>
+		</div>
+	</header>
+	<div class="container">
+        <div class="row">
+            <div class="col-md-12">
+				{% block content %}
+				{% endblock %}
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block javascripts %}
+	<script src="{{ asset('js/jquery.min.js	') }}"></script>
+	<script src="{{ asset('js/jquery.collection.js') }}"></script>
+	<script src="{{ asset('js/dropzone.js') }}"></script>
+    <script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+    <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
+	<script src="{{ asset('js/app.js') }}"></script>
+{% endblock %}
+    </body>
+</html>
