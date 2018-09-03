@@ -33,15 +33,12 @@ class GoodsRepository extends ServiceEntityRepository
 				$item['title'] = $node->filter('.cItems_title')->text();
 				$item['link'] = $node->filter('a.full-link')->attr('data-compare_link');
 				$item['img'] = $node->filter('.media img')->attr('src');
-				
-				/*TODO получать по новому бренд*/
-				$item['brand'] = $node->filter('meta[itemprop="brand"]')->attr('content');
-				
+
 				if ($node->filter('meta[itemprop="lowPrice"]')->count() > 0) {
 					$item['min_cost'] = $node->filter('meta[itemprop="lowPrice"]')->attr('content');
 				} else {
 					$item['min_cost'] = $node->filter('meta[itemprop="price"]')->attr('content');
-				}											
+				}
 
 				return $item;
 			});
@@ -57,11 +54,17 @@ class GoodsRepository extends ServiceEntityRepository
 						->filter('span.num')
 						->text();
 
+			$brand = $crawlerPage
+						->filter('ul.brc.brc_blue>li>a')											
+						->eq(2)
+						->filter('meta[itemprop="name"]')
+						->attr('content');		
+
 			$goodsObj = new Goods();
 			$goodsObj->setTitle($goods['title']);
-			$goodsObj->setBrand($goods['brand']);
 			$goodsObj->setImage($goods['img']);
 			$goodsObj->setMinCost($goods['min_cost']);
+			$goodsObj->setBrand($brand);
 			$goodsObj->setShops($shops);
 			$goodsObj->setComments($comments);
 
