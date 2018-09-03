@@ -19,20 +19,22 @@ class MainController extends Controller
 		$client = $this->get('eight_points_guzzle.client.parser');
 		$repo = $this->getDoctrine()->getRepository(Goods::class);
 
-		$crawler = $repo->parsePages($client, '/mobilnye-telefony/?iPageNo=2');
+		$crawler = $repo->parsePages($client, '/mobilnye-telefony/?iPageNo=3');
 
 		$counter = 1;
 		$nextPage = $crawler->filter('.b-pagination-list .p-next a.p-inside')->count();
 
-		while ($nextPage) {
+		while ($nextPage) {			
 			$nextUrl = parse_url($crawler->filter('.b-pagination-list .p-next a.p-inside')->attr('href'));
 
+			sleep(10);
 			$crawler = $repo->parsePages($client, $nextUrl['path'] . '?' . $nextUrl['query']);
 
 			$nextPage = $crawler->filter('.b-pagination-list .p-next a.p-inside')->count();
 
 			$counter++;
 			if ($counter >3 ) {
+				dump('SUCCESS'); exit;				
 				break;
 			}
 		}

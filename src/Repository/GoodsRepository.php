@@ -21,23 +21,27 @@ class GoodsRepository extends ServiceEntityRepository
         parent::__construct($registry, Goods::class);
     }
 
-	public function parsePages($client, $url) {
+	public function parsePages($client, $url, $counter = 0) {
 
 		$categoryHtml = $client->request('GET', $url)->getBody()->getContents();
 		$crawlerCategory = new Crawler($categoryHtml);
-
+		
+		if ($counter == 2) {
+			dump($categoryHtml); exit;
+		}
+		
 		$goodsInfo = $crawlerCategory
 			->filter('.cItems_col')
 			->each(function (Crawler $node, $i) {
 
 				$item['title'] = $node->filter('.cItems_title')->text();
 				$item['link'] = $node->filter('a.full-link')->attr('data-compare_link');
-				$item['img'] = $node->filter('.media img')->attr('src');
-
+				$item['img'] = $node->filter('.media img')->attr('src');							
+				
 				if ($node->filter('meta[itemprop="lowPrice"]')->count() > 0) {
 					$item['min_cost'] = $node->filter('meta[itemprop="lowPrice"]')->attr('content');
 				} else {
-					$item['min_cost'] = $node->filter('meta[itemprop="price"]')->attr('content');
+					$item['min_cost'] = $node->filter('[itemprop="price"]')->attr('content');
 				}
 
 				return $item;
@@ -47,19 +51,11 @@ class GoodsRepository extends ServiceEntityRepository
 			$pageHtml = $client->request('GET', '/'.$goods['link'])->getBody()->getContents();
 			$crawlerPage = new Crawler($pageHtml);
 
-			$shops = $crawlerPage->filter('table.item_table tr')->count();
-			$comments = (int) $crawlerPage
-						->filter('.item_tabs ul li')
-						->eq(3)
-						->filter('span.num')
-						->text();
+			$shops = $crawlerPage->filter('table.item_table tr')->count() ? $crawlerPage->filter('table.item_table tr')->count() : 1;
+			$comments = (int) $crawlerPage->filter('.item_tabs ul li')->eq(3)->filter('span.num')->count() ? $crawlerPage->filter('.item_tabs ul li')->eq(3)->filter('span.num')->text() : 0;
 
-			$brand = $crawlerPage
-						->filter('ul.brc.brc_blue>li>a')											
-						->eq(2)
-						->filter('meta[itemprop="name"]')
-						->attr('content');		
-
+			$brand = $crawlerPage->filter('ul.brc.brc_blue>li>a')->eq(2)->filter('meta[itemprop="name"]')->count() ? $crawlerPage->filter('ul.brc.brc_blue>li>a')->eq(2)->filter('meta[itemprop="name"]')->attr('content') : false;
+								
 			$goodsObj = new Goods();
 			$goodsObj->setTitle($goods['title']);
 			$goodsObj->setImage($goods['img']);
@@ -70,7 +66,7 @@ class GoodsRepository extends ServiceEntityRepository
 
 			$this->_em->persist($goodsObj);
 
-			if ($comments > 0) {
+			if ($comments > 0 && $brand) {
 				$commentHtml = $client->request('GET', '/'.$goods['link'].'?comments')->getBody()->getContents();
 				$crawlerComments = new Crawler($commentHtml);
 
